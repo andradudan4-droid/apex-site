@@ -571,16 +571,23 @@ nav .bar{display:flex;align-items:center;justify-content:space-between;height:70
 .hero .meta b{color:var(--cream);font-weight:600}
 
 .strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink2);overflow:hidden}
-.marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
-.marquee-track{display:flex;align-items:center;gap:30px;width:max-content;padding:17px 0;animation:mq 32s linear infinite}
+.marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent);mask-image:linear-gradient(90deg,transparent,#000 6%,#000 94%,transparent)}
+.marquee-track{display:flex;width:max-content;animation:mq 34s linear infinite}
 .marquee:hover .marquee-track{animation-play-state:paused}
+.mq-set{display:flex;align-items:center;flex:none;gap:28px;padding:17px 28px 17px 0}
 .mq-item{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;color:#d9d0bd;white-space:nowrap}
 .mq-item svg{width:18px;height:18px;color:var(--orange);flex:none}
 .mq-dot{color:rgba(249,115,22,.45);font-size:8px;flex:none}
 .mq-stars{color:#ffb04d;letter-spacing:3px;font-size:14px;white-space:nowrap}
 .mq-rated{font-size:12px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
 @keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media(prefers-reduced-motion:reduce){.marquee-track{animation:none;flex-wrap:wrap;justify-content:center;width:auto;padding:16px 24px}.marquee{-webkit-mask-image:none;mask-image:none}}
+@media (max-width:600px),(prefers-reduced-motion:reduce){
+  .marquee{-webkit-mask-image:none;mask-image:none}
+  .marquee-track{animation:none;width:100%}
+  .mq-set{flex-wrap:wrap;justify-content:center;gap:11px 20px;padding:15px 22px;width:100%}
+  .mq-set + .mq-set{display:none}
+  .mq-dot{display:none}
+}
 
 .sec{padding:clamp(64px,9vw,110px) 0}
 .svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:42px}
@@ -734,13 +741,14 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
   <div class="marquee">
     <div class="marquee-track">
       {% for _ in range(2) %}
+      <div class="mq-set">
         {% for t in ["Interior Painting","Exterior Painting","Feature Walls","Woodwork","Fence Painting","Handyman"] %}
         <span class="mq-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>{{ t }}</span>
         <span class="mq-dot">◆</span>
         {% endfor %}
         <span class="mq-stars">★★★★★</span>
         <span class="mq-rated">5-Star Service</span>
-        <span class="mq-dot">◆</span>
+      </div>
       {% endfor %}
     </div>
   </div>
