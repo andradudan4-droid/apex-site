@@ -84,34 +84,34 @@ SERVICES = [
 # ---------------------------------------------------------------------------
 # Before / after transformations. Each project has a before + one or more afters.
 PROJECTS = [
-    {"title": "Garden fence \u2014 sprayed & restained",
-     "blurb": "Tired bare-timber panels taken to a rich anthracite grey \u2014 posts and gravel boards masked off, even coats, tidied up throughout.",
+    {"title": "Garden fence — sprayed & restained",
+     "blurb": "Tired bare-timber panels taken to a rich anthracite grey — posts and gravel boards masked off, even coats, tidied up throughout.",
      "shots": [
         {"src": "/static/images/fence-before.jpg",  "label": "Before"},
         {"src": "/static/images/fence-after-1.jpg", "label": "After"},
         {"src": "/static/images/fence-after-2.jpg", "label": "After"},
      ]},
-    {"title": "Living room \u2014 full redecoration",
+    {"title": "Living room — full redecoration",
      "blurb": "Patched, bare plaster prepped properly and lifted into a warm terracotta scheme with a crisp white ceiling and coving.",
      "shots": [
         {"src": "/static/images/room-before.webp",  "label": "Before"},
         {"src": "/static/images/room-after-1.webp", "label": "After"},
         {"src": "/static/images/room-after-2.webp", "label": "After"},
      ]},
-    {"title": "Front door & porch \u2014 restored",
-     "blurb": "Weathered, flaking blue brought back to a deep gloss black \u2014 sharp lines cut in around the porthole and frame.",
+    {"title": "Front door & porch — restored",
+     "blurb": "Weathered, flaking blue brought back to a deep gloss black — sharp lines cut in around the porthole and frame.",
      "shots": [
         {"src": "/static/images/door1-before.jpg", "label": "Before"},
         {"src": "/static/images/door1-after.jpg", "label": "After"},
      ]},
-    {"title": "Front entrance \u2014 repaint",
+    {"title": "Front entrance — repaint",
      "blurb": "Faded planked door and surround refinished in hard-wearing black for a smart, modern entrance.",
      "shots": [
         {"src": "/static/images/door2-before.jpg", "label": "Before"},
         {"src": "/static/images/door2-after.jpg", "label": "After"},
      ]},
-    {"title": "Panelled feature wall \u2014 decorated",
-     "blurb": "Dated lilac and pink panelling repainted in a soft, contemporary greige \u2014 mouldings cut in clean and even.",
+    {"title": "Panelled feature wall — decorated",
+     "blurb": "Dated lilac and pink panelling repainted in a soft, contemporary greige — mouldings cut in clean and even.",
      "shots": [
         {"src": "/static/images/panels-before-1.webp", "label": "Before"},
         {"src": "/static/images/panels-before-2.webp", "label": "Before"},
@@ -598,8 +598,9 @@ nav .bar{display:flex;align-items:center;justify-content:space-between;height:70
 .ba-head p{font-size:14px;color:var(--mut);flex:1 1 300px;min-width:220px}
 .ba-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
 .ba-row.two{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-.ba .shot{margin:0}
-.ba .shot img{width:100%;height:100%;aspect-ratio:4/3;object-fit:cover}
+.ba .shot{margin:0;position:relative;aspect-ratio:4/3}
+.ba .shot img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.ba .shot .tag{z-index:2}
 .tag.before{color:#ece3d2;background:rgba(7,6,5,.8)}
 .tag.after{color:#fff;background:var(--orange);border-color:transparent}
 .ba-more{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--cream);margin:52px 0 2px}
@@ -747,7 +748,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
   <div class="wrap">
     <div class="eyebrow reveal">Our work</div>
     <h2 class="title reveal">Before &amp; after</h2>
-    <p class="lede reveal">Real jobs around Woking and Surrey \u2014 see the difference on each one. Tap any photo to enlarge.</p>
+    <p class="lede reveal">Real jobs around Woking and Surrey — see the difference on each one. Tap any photo to enlarge.</p>
     <div class="ba-wrap">
       {% for p in projects %}
       <div class="ba reveal">
@@ -756,7 +757,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
           {% for s in p.shots %}
           <figure class="shot">
             <span class="tag {{ 'after' if s.label == 'After' else 'before' }}">{{ s.label }}</span>
-            <img src="{{ s.src }}" alt="{{ p.title }} \u2014 {{ s.label|lower }}" loading="lazy">
+            <img src="{{ s.src }}" alt="{{ p.title }} — {{ s.label|lower }}" loading="lazy">
           </figure>
           {% endfor %}
         </div>
@@ -769,7 +770,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
       {% for url in gallery %}
       <figure class="shot reveal">
         <span class="tag">Apex</span>
-        <img src="{{ url }}" alt="Apex Home Transformations \u2014 recent painting &amp; decorating work" loading="lazy">
+        <img src="{{ url }}" alt="Apex Home Transformations — recent painting &amp; decorating work" loading="lazy">
       </figure>
       {% endfor %}
     </div>
@@ -842,7 +843,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
           <span class="pill hub">{{ coverage.hub }}</span>
           {% for t in coverage.towns %}<span class="pill">{{ t }}</span>{% endfor %}
         </div>
-        <p class="cov-note">\u2026and everywhere in between. Just outside the circle? Get in touch \u2014 Claud will happily take a look.</p>
+        <p class="cov-note">…and everywhere in between. Just outside the circle? Get in touch — Claud will happily take a look.</p>
       </div>
     </div>
   </div>
