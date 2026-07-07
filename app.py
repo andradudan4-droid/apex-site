@@ -544,10 +544,14 @@ nav .bar{display:flex;align-items:center;justify-content:space-between;height:70
 }
 
 .hero{position:relative;min-height:90vh;display:flex;align-items:center;isolation:isolate;overflow:hidden}
-.hero::before{content:"";position:absolute;inset:0;z-index:-2;background:
-  radial-gradient(90% 70% at 78% 8%,rgba(249,115,22,.22),transparent 55%),
-  radial-gradient(70% 60% at 10% 100%,rgba(249,115,22,.10),transparent 60%),
-  linear-gradient(180deg,#100e0b,#0d0c0b)}
+.hero::before{content:"";position:absolute;inset:0;z-index:-2;background-color:#0d0c0b;background:
+  linear-gradient(90deg,rgba(13,12,11,.94),rgba(13,12,11,.74) 46%,rgba(13,12,11,.5)),
+  linear-gradient(180deg,rgba(13,12,11,.18),rgba(13,12,11,.58)),
+  radial-gradient(90% 70% at 78% 8%,rgba(249,115,22,.2),transparent 55%),
+  url('/static/images/room-after-1.webp') center/cover no-repeat}
+@media(max-width:860px){.hero::before{background:
+  linear-gradient(180deg,rgba(13,12,11,.72),rgba(13,12,11,.9)),
+  url('/static/images/room-after-1.webp') center/cover no-repeat}}
 .hero::after{content:"";position:absolute;inset:0;z-index:-2;opacity:.5;
   background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
   background-size:64px 64px;-webkit-mask-image:radial-gradient(circle at 78% 20%,#000,transparent 60%);mask-image:radial-gradient(circle at 78% 20%,#000,transparent 60%)}
