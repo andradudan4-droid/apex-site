@@ -570,10 +570,17 @@ nav .bar{display:flex;align-items:center;justify-content:space-between;height:70
 .hero .meta{display:flex;gap:26px;flex-wrap:wrap;margin-top:40px;color:var(--mut);font-size:13.5px}
 .hero .meta b{color:var(--cream);font-weight:600}
 
-.strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink2)}
-.strip .wrap{display:flex;flex-wrap:wrap;gap:14px 40px;padding:20px 24px;align-items:center;justify-content:center}
-.strip span{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;color:#d9d0bd}
-.strip svg{width:18px;height:18px;color:var(--orange)}
+.strip{border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:var(--ink2);overflow:hidden}
+.marquee{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent)}
+.marquee-track{display:flex;align-items:center;gap:30px;width:max-content;padding:17px 0;animation:mq 32s linear infinite}
+.marquee:hover .marquee-track{animation-play-state:paused}
+.mq-item{display:inline-flex;align-items:center;gap:9px;font-size:13.5px;color:#d9d0bd;white-space:nowrap}
+.mq-item svg{width:18px;height:18px;color:var(--orange);flex:none}
+.mq-dot{color:rgba(249,115,22,.45);font-size:8px;flex:none}
+.mq-stars{color:#ffb04d;letter-spacing:3px;font-size:14px;white-space:nowrap}
+.mq-rated{font-size:12px;font-weight:600;color:var(--orange);text-transform:uppercase;letter-spacing:.09em;white-space:nowrap}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.marquee-track{animation:none;flex-wrap:wrap;justify-content:center;width:auto;padding:16px 24px}.marquee{-webkit-mask-image:none;mask-image:none}}
 
 .sec{padding:clamp(64px,9vw,110px) 0}
 .svc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:16px;margin-top:42px}
@@ -723,11 +730,19 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
   </div>
 </header>
 
-<div class="strip">
-  <div class="wrap">
-    {% for t in ["Interior Painting","Exterior Painting","Feature Walls","Woodwork","Fence Painting","Handyman"] %}
-    <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>{{ t }}</span>
-    {% endfor %}
+<div class="strip" aria-hidden="true">
+  <div class="marquee">
+    <div class="marquee-track">
+      {% for _ in range(2) %}
+        {% for t in ["Interior Painting","Exterior Painting","Feature Walls","Woodwork","Fence Painting","Handyman"] %}
+        <span class="mq-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>{{ t }}</span>
+        <span class="mq-dot">◆</span>
+        {% endfor %}
+        <span class="mq-stars">★★★★★</span>
+        <span class="mq-rated">5-Star Service</span>
+        <span class="mq-dot">◆</span>
+      {% endfor %}
+    </div>
   </div>
 </div>
 
@@ -880,6 +895,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
   <div class="wrap">
     <div>© <span id="yr"></span> {{ b.name }} · {{ b.postcode }} Woking, Surrey</div>
     <div>Interior &amp; Exterior Painting · Decorating · Feature Walls · Fences · Handyman</div>
+    <div><a href="/privacy" style="color:var(--mut);transition:.2s" onmouseover="this.style.color='var(--orange)'" onmouseout="this.style.color='var(--mut)'">Privacy Policy</a></div>
   </div>
 </footer>
 
@@ -979,6 +995,86 @@ def home():
     return render_template_string(PAGE, b=BUSINESS, services=SERVICES,
                                   projects=PROJECTS, gallery=GALLERY,
                                   coverage=COVERAGE, reviews=REVIEWS, logo=LOGO_SVG)
+
+
+PRIVACY_PAGE = r"""<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Privacy Policy | {{ b.name }}</title>
+<meta name="description" content="How Apex Home Transformations handles your personal information.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0d0c0b;--ink2:#17140f;--cream:#f5efe8;--mut:#a99f92;--orange:#f97316;--line:rgba(249,115,22,.22)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--ink);color:var(--cream);font-family:'Inter',system-ui,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased}
+a{color:var(--orange);text-decoration:none}a:hover{text-decoration:underline}
+.wrap{max-width:760px;margin:0 auto;padding:52px 24px 90px}
+.back{display:inline-flex;align-items:center;gap:8px;font-size:14px;color:var(--mut);margin-bottom:34px}
+.back:hover{color:var(--orange);text-decoration:none}
+h1{font-family:'Fraunces',serif;font-weight:600;font-size:clamp(30px,5vw,44px);margin-bottom:8px}
+.upd{color:var(--mut);font-size:13.5px;margin-bottom:26px}
+h2{font-family:'Fraunces',serif;font-weight:600;font-size:20px;margin:32px 0 9px;color:#fff}
+p{color:#e5ddcd;margin-bottom:13px;font-size:15.5px}
+ul{margin:0 0 15px 22px;color:#e5ddcd;font-size:15.5px}
+li{margin-bottom:6px}
+.box{background:var(--ink2);border:1px solid var(--line);border-radius:14px;padding:18px 22px;margin:24px 0}
+.box p:last-child{margin-bottom:0}
+footer{border-top:1px solid var(--line);color:var(--mut);font-size:13px;padding:24px;text-align:center}
+</style></head>
+<body>
+<div class="wrap">
+  <a class="back" href="/">&larr; Back to {{ b.short }}</a>
+  <h1>Privacy Policy</h1>
+  <div class="upd">Last updated: 7 July 2026</div>
+
+  <p>This policy explains how {{ b.name }} ("we", "us", "our") handles your personal information when you get in touch through this website. We keep it simple: we only use your details to answer your enquiry and give you a quote, and we never sell them to anyone.</p>
+
+  <div class="box">
+    <p><strong>Who's responsible for your data</strong></p>
+    <p>{{ b.name }}, {{ b.postcode }} Woking, Surrey.<br>
+    Email: <a href="mailto:{{ b.email_public }}">{{ b.email_public }}</a> &nbsp;·&nbsp; Phone: <a href="tel:+{{ b.phone_e164 }}">{{ b.phone_display }}</a></p>
+  </div>
+
+  <h2>What we collect</h2>
+  <p>Only what you choose to give us when you make an enquiry, which may include:</p>
+  <ul>
+    <li>Your name and contact details (phone number, email, and the area or postcode of the job).</li>
+    <li>Details about the work you'd like done, and any photos you send us through the chat.</li>
+    <li>The messages you send us via the on-site chat assistant, WhatsApp, or email.</li>
+  </ul>
+  <p>We don't ask for anything sensitive, and there's no need to create an account.</p>
+
+  <h2>Why we use it</h2>
+  <p>To reply to your enquiry, prepare a quote, and carry out any work you go on to book. The legal basis is your consent when you contact us, and our legitimate interest in responding to potential customers and running the business.</p>
+
+  <h2>The chat assistant &amp; your photos</h2>
+  <p>The quote chat is powered by an AI service (Groq) that processes your messages to generate a reply. When you send an enquiry or a photo, we're notified by email through a delivery service (Resend) so we can get back to you. These providers only handle your information to make the website work — they don't use it for their own purposes.</p>
+
+  <h2>Cookies</h2>
+  <p>We use one essential cookie to keep your chat session working while you're on the site. That's it — no advertising or tracking cookies.</p>
+
+  <h2>Who we share it with</h2>
+  <p>Nobody, beyond the service providers above that we need to run the site and reply to you. We never sell your information or pass it to third parties for marketing.</p>
+
+  <h2>How long we keep it</h2>
+  <p>Only as long as we need it to deal with your enquiry and any work that follows, plus a reasonable period afterwards for our records. After that it's deleted. You can ask us to remove your details sooner at any time.</p>
+
+  <h2>Your rights</h2>
+  <p>Under UK data protection law you can ask us to show you the information we hold about you, correct it, or delete it, and you can object to how we use it. Just email <a href="mailto:{{ b.email_public }}">{{ b.email_public }}</a> and we'll sort it. If you're ever unhappy with how we've handled your data, you can also contact the Information Commissioner's Office (ICO) at <a href="https://ico.org.uk" target="_blank" rel="noopener">ico.org.uk</a>.</p>
+
+  <h2>Changes to this policy</h2>
+  <p>If we update how we handle your information, we'll post the new version here with a fresh date at the top.</p>
+</div>
+<footer>© <span id="yr"></span> {{ b.name }} · {{ b.postcode }} Woking, Surrey</footer>
+<script>document.getElementById('yr').textContent=new Date().getFullYear()</script>
+</body></html>"""
+
+
+@app.route("/privacy")
+def privacy():
+    return render_template_string(PRIVACY_PAGE, b=BUSINESS)
 
 
 @app.route("/sitemap.xml")
