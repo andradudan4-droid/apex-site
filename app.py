@@ -80,26 +80,70 @@ SERVICES = [
 ]
 
 # ---------------------------------------------------------------------------
-# GALLERY  --  loaded straight from Claud's MyJobQuote profile (his own photos).
-# For a fully self-hosted site, replace these with hosted image files later.
+# WORK  --  Claud's own photos, self-hosted from static/images/
 # ---------------------------------------------------------------------------
-_CDN = "https://cdn.myjobquote.co.uk/gallery/{}-c2m500.jpg"
-_GALLERY_IDS = [
-    "Lalp3HhUBQV0a0xxmhJp5jVcKGCcoPOg", "MvVbkgUAoSmIganjcDTm6jJ2qR2lWCzW",
-    "t8HJDJUX64MHK50dknAXC8mdozd7K69S", "lvlKdPlvrCG2eVIEVAlpHfgi9YPx32PY",
-    "8W1uE18G3IjuBdMNDsK4LAVMs994F7hE", "dFCqhbSiE8Kqspgsyx0vFlXIlaq1xnca",
-    "9EXHqm2n6nwbr4bT0cRgIinIbHn9njYd", "7P5dphzCIndIMTcMAqzXWsdf0gpFaP25",
-    "bAvlCp7SuvA8n3cbg3k085TI5N3pxB9e", "PDu31d1SbfZR8ZTm2wF8iVpUqpbPMdtH",
-    "Iiz6RaWnJLgxKxYWvgQfTgOUggSylO0q", "jZ9VqK4OWnoI2ltCm6BRGm9bXgTGvDES",
-    "eIWM0sFDpIv4pUPlBhTCWlh3uhsIjLKo", "215zaqog6eIhh2WKl7q1msq8Q4ZX9xeo",
-    "kjhJzmk1Aa017W1VM0jLvV8Rm7qTOcV4", "HC9lLIAAHhuie9ymHO9C7lV5AGIMxDj6",
-    "pwr2beAkYMC8x52aozFvnTGROtGNqy6w", "pnxuWuqB0bMnr5T2eNWIifvSuetpNEjc",
-    "GwhambpobPbSoF0RUGLcOIWJgCmGr5hx", "S1CM57aiqe5Ecl1kstKWWObTxtMx6w88",
-    "dEveq1aXyXBxJre2YyRrOFlBNnrpdkzl", "mCcN00kR2Z3ubU306kghCDwDTGTPjuvu",
-    "q6u3qpz9Cz9PqrBS3fqHgU5VjMup25Ix", "HkNOM7gCov8mHmewCxwWbDCbljURQdyR",
-    "6jH8byWmP9e56i9aXYxUHDggORjgXwf2", "JZddAWaj8BOkhPCIW719vGGzEtPPHkOJ",
+# Before / after transformations. Each project has a before + one or more afters.
+PROJECTS = [
+    {"title": "Garden fence \u2014 sprayed & restained",
+     "blurb": "Tired bare-timber panels taken to a rich anthracite grey \u2014 posts and gravel boards masked off, even coats, tidied up throughout.",
+     "shots": [
+        {"src": "/static/images/fence-before.jpg",  "label": "Before"},
+        {"src": "/static/images/fence-after-1.jpg", "label": "After"},
+        {"src": "/static/images/fence-after-2.jpg", "label": "After"},
+     ]},
+    {"title": "Living room \u2014 full redecoration",
+     "blurb": "Patched, bare plaster prepped properly and lifted into a warm terracotta scheme with a crisp white ceiling and coving.",
+     "shots": [
+        {"src": "/static/images/room-before.webp",  "label": "Before"},
+        {"src": "/static/images/room-after-1.webp", "label": "After"},
+        {"src": "/static/images/room-after-2.webp", "label": "After"},
+     ]},
+    {"title": "Front door & porch \u2014 restored",
+     "blurb": "Weathered, flaking blue brought back to a deep gloss black \u2014 sharp lines cut in around the porthole and frame.",
+     "shots": [
+        {"src": "/static/images/door1-before.jpg", "label": "Before"},
+        {"src": "/static/images/door1-after.jpg", "label": "After"},
+     ]},
+    {"title": "Front entrance \u2014 repaint",
+     "blurb": "Faded planked door and surround refinished in hard-wearing black for a smart, modern entrance.",
+     "shots": [
+        {"src": "/static/images/door2-before.jpg", "label": "Before"},
+        {"src": "/static/images/door2-after.jpg", "label": "After"},
+     ]},
+    {"title": "Panelled feature wall \u2014 decorated",
+     "blurb": "Dated lilac and pink panelling repainted in a soft, contemporary greige \u2014 mouldings cut in clean and even.",
+     "shots": [
+        {"src": "/static/images/panels-before-1.webp", "label": "Before"},
+        {"src": "/static/images/panels-before-2.webp", "label": "Before"},
+        {"src": "/static/images/panels-after.webp",    "label": "After"},
+     ]},
 ]
-GALLERY = [_CDN.format(i) for i in _GALLERY_IDS]
+
+# Recent finished work (general masonry gallery)
+GALLERY = [
+    "/static/images/work-lounge-blue.webp",
+    "/static/images/work-kitchen-green.webp",
+    "/static/images/work-bedroom-grey.webp",
+    "/static/images/work-hallway.webp",
+    "/static/images/work-kitchen-black-1.webp",
+    "/static/images/work-kitchen-black-2.webp",
+]
+
+# ---------------------------------------------------------------------------
+# COVERAGE  --  Woking + ~15-mile radius (drives the map section & the bot)
+# ---------------------------------------------------------------------------
+COVERAGE = {
+    "hub": "Woking",
+    "radius_miles": 15,
+    "towns": [
+        "Guildford", "Horsell", "Knaphill", "Brookwood", "West Byfleet",
+        "Byfleet", "Pyrford", "Send", "Ripley", "Old Woking", "Mayford",
+        "Worplesdon", "Chobham", "Bisley", "Bagshot", "Lightwater",
+        "Windlesham", "Addlestone", "Ottershaw", "Chertsey", "Weybridge",
+        "Cobham", "Camberley", "Frimley", "Leatherhead", "Egham",
+        "Sunningdale", "Ascot", "Godalming",
+    ],
+}
 
 # ---------------------------------------------------------------------------
 # REVIEWS  --  the two genuine reviews from Claud's MyJobQuote profile.
@@ -375,6 +419,7 @@ About the business:
   soffits, fascias), windows/doors/woodwork, feature walls & murals, fence
   painting & staining, and general handyman / odd jobs.
 - Tidy, reliable, professional finish. Tagline: "Elevating homes, transforming lives."
+- Coverage: based in Woking, covers roughly a {COVERAGE['radius_miles']}-mile radius — including {', '.join([COVERAGE['hub']] + COVERAGE['towns'])}. If someone is just outside that, say Claud will happily take a look rather than turning them away.
 
 YOUR TONE — important:
 Warm, friendly and down-to-earth, like a helpful local tradesperson sending a
@@ -541,6 +586,31 @@ nav .bar{display:flex;align-items:center;justify-content:space-between;height:70
 .shot:hover img{transform:scale(1.05)}
 .shot .tag{position:absolute;top:10px;left:10px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);background:rgba(7,6,5,.72);border:1px solid var(--line);padding:4px 9px;border-radius:999px}
 
+/* before / after projects */
+.ba-wrap{display:flex;flex-direction:column;gap:26px;margin-top:42px}
+.ba{background:linear-gradient(180deg,var(--panel),var(--ink2));border:1px solid var(--line);border-radius:var(--rad);padding:22px 22px 24px}
+.ba-head{display:flex;flex-wrap:wrap;align-items:baseline;gap:6px 16px;margin-bottom:16px}
+.ba-head h3{font-family:'Fraunces',serif;font-weight:600;font-size:20px;color:var(--cream)}
+.ba-head p{font-size:14px;color:var(--mut);flex:1 1 300px;min-width:220px}
+.ba-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:12px}
+.ba-row.two{grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.ba .shot{margin:0}
+.ba .shot img{width:100%;height:100%;aspect-ratio:4/3;object-fit:cover}
+.tag.before{color:#ece3d2;background:rgba(7,6,5,.8)}
+.tag.after{color:#fff;background:var(--orange);border-color:transparent}
+.ba-more{font-family:'Fraunces',serif;font-weight:600;font-size:22px;color:var(--cream);margin:52px 0 2px}
+
+/* coverage / areas */
+.cov{display:grid;grid-template-columns:300px 1fr;gap:44px;align-items:center;margin-top:42px}
+.radar{justify-self:center;width:100%;max-width:300px}
+.radar svg{width:100%;height:auto;display:block}
+.pills{display:flex;flex-wrap:wrap;gap:9px}
+.pill{font-size:13.5px;color:#e9e2d3;border:1px solid var(--line);background:rgba(249,115,22,.05);border-radius:999px;padding:7px 14px;transition:.2s}
+.pill:hover{border-color:rgba(249,115,22,.55);color:var(--orange)}
+.pill.hub{background:var(--orange);color:#fff;border-color:transparent;font-weight:600}
+.cov-note{margin-top:20px;font-size:13.5px;color:var(--mut);max-width:560px}
+@media(max-width:760px){.cov{grid-template-columns:1fr;gap:26px}.radar{max-width:260px}}
+
 .lb{position:fixed;inset:0;z-index:120;background:rgba(6,5,4,.94);display:none;align-items:center;justify-content:center;padding:24px}
 .lb.open{display:flex}
 .lb img{max-width:92vw;max-height:84vh;border-radius:10px;box-shadow:0 30px 80px -20px rgba(0,0,0,.8)}
@@ -622,6 +692,7 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
       <a href="#services" onclick="closeNav()">Services</a>
       <a href="#work" onclick="closeNav()">Our Work</a>
       <a href="#reviews" onclick="closeNav()">Reviews</a>
+      <a href="#areas" onclick="closeNav()">Areas</a>
       <a href="#contact" onclick="closeNav()">Contact</a>
       <a class="navcta" href="#contact" onclick="closeNav();openChat()">Free Quote</a>
     </div>
@@ -671,13 +742,30 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
 <section class="sec" id="work" style="padding-top:0">
   <div class="wrap">
     <div class="eyebrow reveal">Our work</div>
-    <h2 class="title reveal">Recent projects</h2>
-    <p class="lede reveal">A selection of recent jobs around Woking and Surrey. Tap any photo to take a closer look.</p>
+    <h2 class="title reveal">Before &amp; after</h2>
+    <p class="lede reveal">Real jobs around Woking and Surrey \u2014 see the difference on each one. Tap any photo to enlarge.</p>
+    <div class="ba-wrap">
+      {% for p in projects %}
+      <div class="ba reveal">
+        <div class="ba-head"><h3>{{ p.title }}</h3><p>{{ p.blurb }}</p></div>
+        <div class="ba-row{% if p.shots|length == 2 %} two{% endif %}">
+          {% for s in p.shots %}
+          <figure class="shot">
+            <span class="tag {{ 'after' if s.label == 'After' else 'before' }}">{{ s.label }}</span>
+            <img src="{{ s.src }}" alt="{{ p.title }} \u2014 {{ s.label|lower }}" loading="lazy">
+          </figure>
+          {% endfor %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <h3 class="ba-more reveal">More recent work</h3>
     <div class="gallery" id="gallery">
       {% for url in gallery %}
       <figure class="shot reveal">
         <span class="tag">Apex</span>
-        <img src="{{ url }}" alt="Apex Home Transformations painting &amp; decorating work" loading="lazy" referrerpolicy="no-referrer" onerror="this.closest('.shot').remove()">
+        <img src="{{ url }}" alt="Apex Home Transformations \u2014 recent painting &amp; decorating work" loading="lazy">
       </figure>
       {% endfor %}
     </div>
@@ -706,6 +794,52 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
       <div class="rev reveal"><div class="stars">★★★★★</div><p>“{{ r.text }}”</p>
         <div class="who"><b>{{ r.name }}</b> · {{ r.where }}</div></div>
       {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="sec" id="areas">
+  <div class="wrap">
+    <div class="eyebrow reveal">Where we work</div>
+    <h2 class="title reveal">Covering Woking &amp; 15 miles around.</h2>
+    <p class="lede reveal">Based in Woking and working right across west Surrey and over the Berkshire border. If you're within about 15 miles, Claud can get to you.</p>
+    <div class="cov reveal">
+      <div class="radar">
+        <svg viewBox="0 0 320 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Map showing Apex covers roughly 15 miles around Woking">
+          <defs>
+            <radialGradient id="cg" cx="50%" cy="53%" r="52%">
+              <stop offset="0%" stop-color="rgba(249,115,22,.18)"/>
+              <stop offset="60%" stop-color="rgba(249,115,22,.05)"/>
+              <stop offset="100%" stop-color="rgba(249,115,22,0)"/>
+            </radialGradient>
+          </defs>
+          <circle cx="160" cy="160" r="135" fill="url(#cg)"/>
+          <circle cx="160" cy="160" r="135" fill="none" stroke="rgba(249,115,22,.34)" stroke-width="1" stroke-dasharray="3 5"/>
+          <circle cx="160" cy="160" r="90"  fill="none" stroke="rgba(249,115,22,.26)" stroke-width="1" stroke-dasharray="3 5"/>
+          <circle cx="160" cy="160" r="45"  fill="none" stroke="rgba(249,115,22,.2)"  stroke-width="1" stroke-dasharray="3 5"/>
+          <line x1="160" y1="22" x2="160" y2="298" stroke="rgba(249,115,22,.1)" stroke-width="1"/>
+          <line x1="25"  y1="160" x2="295" y2="160" stroke="rgba(249,115,22,.1)" stroke-width="1"/>
+          <text x="160" y="16" text-anchor="middle" fill="#a99f92" font-size="10" font-family="Inter,sans-serif" letter-spacing=".14em">15 MILES</text>
+          <g font-family="Inter,sans-serif" font-size="9.5" fill="#cfc6b6">
+            <circle cx="177" cy="113" r="2.6" fill="#f97316"/><text x="183" y="112">Chertsey</text>
+            <circle cx="203" cy="130" r="2.6" fill="#f97316"/><text x="209" y="129">Weybridge</text>
+            <circle cx="218" cy="181" r="2.6" fill="#f97316"/><text x="224" y="184">Cobham</text>
+            <circle cx="126" cy="209" r="2.6" fill="#f97316"/><text x="120" y="221" text-anchor="end">Guildford</text>
+            <circle cx="92"  cy="154" r="2.6" fill="#f97316"/><text x="86"  y="153" text-anchor="end">Camberley</text>
+            <circle cx="143" cy="131" r="2.6" fill="#f97316"/><text x="138" y="126" text-anchor="end">Chobham</text>
+          </g>
+          <circle cx="160" cy="160" r="7" fill="#f97316"/>
+          <circle cx="160" cy="160" r="7" fill="none" stroke="#fff" stroke-width="1.5" opacity=".85"/>
+          <text x="160" y="182" text-anchor="middle" fill="#fff" font-size="12.5" font-weight="600" font-family="Fraunces,serif">Woking</text>
+        </svg>
+      </div>
+      <div>
+        <div class="pills">
+          <span class="pill hub">{{ coverage.hub }}</span>
+          {% for t in coverage.towns %}<span class="pill">{{ t }}</span>{% endfor %}
+        </div>
+        <p class="cov-note">\u2026and everywhere in between. Just outside the circle? Get in touch \u2014 Claud will happily take a look.</p>
+      </div>
     </div>
   </div>
 </section>
@@ -789,7 +923,7 @@ document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
 
 let lbi=0;
 function shots(){return [...document.querySelectorAll('.shot img')]}
-document.getElementById('gallery').addEventListener('click',e=>{const img=e.target.closest('.shot')&&e.target.closest('.shot').querySelector('img');
+document.getElementById('work').addEventListener('click',e=>{const img=e.target.closest('.shot')&&e.target.closest('.shot').querySelector('img');
   if(!img)return;lbi=shots().indexOf(img);showLb()});
 function showLb(){const im=shots()[lbi];if(!im)return;document.getElementById('lbimg').src=im.src;document.getElementById('lb').classList.add('open')}
 function stepLb(d){const s=shots();lbi=(lbi+d+s.length)%s.length;showLb()}
@@ -838,7 +972,8 @@ def ensure_session():
 def home():
     ensure_session()
     return render_template_string(PAGE, b=BUSINESS, services=SERVICES,
-                                  gallery=GALLERY, reviews=REVIEWS, logo=LOGO_SVG)
+                                  projects=PROJECTS, gallery=GALLERY,
+                                  coverage=COVERAGE, reviews=REVIEWS, logo=LOGO_SVG)
 
 
 @app.route("/sitemap.xml")
