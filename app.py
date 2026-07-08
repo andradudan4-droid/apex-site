@@ -34,7 +34,7 @@ BUSINESS = {
     "owner": "Claud",                 # owner Claudiu ("Claud")
     "phone_display": "07512 918722",
     "phone_e164": "447512918722",
-    "email_public": "gfnclaud@gmail.com",   # <-- swap to info@apexhome.co.uk once that inbox is live
+    "email_public": "apexhomeconstructions1@gmail.com",   # <-- swap to info@apexhome.co.uk once that inbox is live
     "area_line": "Woking, Chobham, Brookwood & across Surrey",
     "postcode": "GU22 7LJ",
     "instagram": "",                  # add when he has one
@@ -42,7 +42,7 @@ BUSINESS = {
 }
 
 RESEND_API_KEY = os.environ.get("RESEND_API_KEY")
-NOTIFY_TO = os.environ.get("NOTIFY_TO", "gfnclaud@gmail.com")
+NOTIFY_TO = os.environ.get("NOTIFY_TO", "apexhomeconstructions1@gmail.com")
 MAIL_FROM = os.environ.get("MAIL_FROM", "Apex Website <onboarding@resend.dev>")
 
 MAX_IMAGES_PER_SESSION = 6
