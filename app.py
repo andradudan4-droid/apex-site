@@ -456,6 +456,7 @@ never show it. Put it on its own line at the very end of the final message only.
 all_conversations = {}
 notified_sessions = set()
 chat_activity = {}
+chat_failures = {}  # session_id -> consecutive failed AI calls, so we never leave someone stuck
 session_images = {}
 
 
@@ -671,31 +672,44 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
 .wa{position:fixed;left:20px;bottom:22px;z-index:90;width:56px;height:56px;border-radius:50%;background:#25D366;display:grid;place-items:center;box-shadow:0 10px 30px -8px rgba(37,211,102,.7);transition:.2s}
 .wa:hover{transform:scale(1.07)}.wa svg{width:30px;height:30px;color:#fff}
 
-.chat-btn{position:fixed;right:20px;bottom:22px;z-index:95;background:var(--orange);color:#fff;border:0;border-radius:999px;padding:14px 22px;font-weight:600;font-family:inherit;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:9px;box-shadow:0 12px 34px -10px rgba(249,115,22,.8);transition:.2s}
-.chat-btn:hover{transform:translateY(-2px)}
+@keyframes chatPulse{0%,100%{box-shadow:0 12px 34px -10px rgba(249,115,22,.8),0 0 0 0 rgba(249,115,22,.55)}50%{box-shadow:0 12px 34px -10px rgba(249,115,22,.8),0 0 0 10px rgba(249,115,22,0)}}
+.chat-btn{position:fixed;right:20px;bottom:22px;z-index:95;background:var(--orange);color:#fff;border:0;border-radius:999px;padding:14px 22px;font-weight:600;font-family:inherit;font-size:15px;cursor:pointer;display:flex;align-items:center;gap:9px;box-shadow:0 12px 34px -10px rgba(249,115,22,.8);transition:transform .2s;animation:chatPulse 2.6s ease-in-out infinite}
+.chat-btn:hover{transform:translateY(-2px);animation-play-state:paused}
 .chat-btn svg{width:20px;height:20px}
-.chat-panel{position:fixed;right:20px;bottom:22px;z-index:96;width:min(390px,calc(100vw - 40px));height:min(620px,calc(100vh - 44px));background:#17140f;border:1px solid var(--line);border-radius:20px;display:none;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.7)}
-.chat-panel.open{display:flex}
+.chat-btn .dot{width:8px;height:8px;border-radius:50%;background:#4ade80;box-shadow:0 0 0 2px rgba(255,255,255,.25)}
+.chat-panel{position:fixed;right:20px;bottom:22px;z-index:96;width:min(390px,calc(100vw - 40px));height:min(640px,calc(100vh - 44px));background:#17140f;border:1px solid var(--line);border-radius:20px;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 30px 80px -20px rgba(0,0,0,.7);
+  transform-origin:bottom right;opacity:0;transform:scale(.92) translateY(14px);pointer-events:none;transition:opacity .22s ease,transform .22s cubic-bezier(.2,.9,.3,1.3)}
+.chat-panel.open{opacity:1;transform:scale(1) translateY(0);pointer-events:auto}
 .chat-head{background:linear-gradient(120deg,#201a13,#15110c);padding:16px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line)}
-.chat-head .logo{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:#0d0c0b}
+.chat-head .logo{width:40px;height:40px;border-radius:50%;border:1px solid var(--line);display:grid;place-items:center;background:#0d0c0b;position:relative}
 .chat-head .logo svg{width:24px;height:16px}
+.chat-head .logo .online{position:absolute;right:-1px;bottom:-1px;width:11px;height:11px;border-radius:50%;background:#4ade80;border:2px solid #17140f}
 .chat-head .t{font-family:'Fraunces',serif;font-weight:600;color:var(--orange)}
 .chat-head .s{font-size:11.5px;color:var(--mut)}
-.chat-head .close{margin-left:auto;background:none;border:0;color:var(--mut);font-size:22px;cursor:pointer}
+.chat-head .close{margin-left:auto;background:none;border:0;color:var(--mut);font-size:22px;cursor:pointer;transition:color .15s}
+.chat-head .close:hover{color:var(--orange)}
 .msgs{flex:1;overflow-y:auto;padding:18px;display:flex;flex-direction:column;gap:12px}
-.msg{max-width:82%;padding:11px 14px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+@keyframes msgIn{from{opacity:0;transform:translateY(8px) scale(.98)}to{opacity:1;transform:none}}
+.msg{max-width:82%;padding:11px 14px;border-radius:14px;font-size:14.5px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word;animation:msgIn .28s ease}
 .msg.bot{align-self:flex-start;background:#241d15;border:1px solid var(--line);color:#ece4d3;border-bottom-left-radius:4px}
 .msg.user{align-self:flex-end;background:var(--orange);color:#fff;border-bottom-right-radius:4px;font-weight:500}
 .msg.img{padding:4px;background:#241d15;border:1px solid var(--line)}
 .msg.img img{border-radius:10px;max-width:180px}
-.typing{align-self:flex-start;color:var(--mut);font-size:13px;padding:4px 6px}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:13px 16px;background:#241d15;border:1px solid var(--line);border-radius:14px;border-bottom-left-radius:4px;animation:msgIn .28s ease}
+.typing span{width:6px;height:6px;border-radius:50%;background:var(--mut);animation:typingDot 1.1s ease-in-out infinite}
+.typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+@keyframes typingDot{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+.qr{display:flex;flex-wrap:wrap;gap:8px;align-self:flex-start;max-width:100%;animation:msgIn .28s ease}
+.qr button{background:#241d15;border:1px solid var(--line);color:var(--orange-soft);font-family:inherit;font-size:13px;padding:8px 14px;border-radius:999px;cursor:pointer;transition:.15s}
+.qr button:hover{background:var(--orange);color:#fff;border-color:var(--orange)}
 .chat-in{display:flex;gap:8px;padding:12px;border-top:1px solid var(--line);background:#15110c;align-items:center}
-.chat-in input[type=text]{flex:1;background:#241d15;border:1px solid var(--line);color:var(--cream);border-radius:999px;padding:11px 16px;font-size:14.5px;font-family:inherit;outline:none}
+.chat-in input[type=text]{flex:1;background:#241d15;border:1px solid var(--line);color:var(--cream);border-radius:999px;padding:11px 16px;font-size:14.5px;font-family:inherit;outline:none;transition:border-color .15s}
 .chat-in input[type=text]:focus{border-color:var(--orange)}
 .iconbtn{background:#241d15;border:1px solid var(--line);color:var(--orange);width:42px;height:42px;border-radius:50%;cursor:pointer;display:grid;place-items:center;flex:none;transition:.2s}
 .iconbtn:hover{background:var(--orange);color:#fff}.iconbtn svg{width:19px;height:19px}
 .iconbtn.busy{opacity:.5;pointer-events:none}
 .hp{position:absolute;left:-9999px}
+@media(prefers-reduced-motion:reduce){.chat-btn{animation:none}.chat-panel{transition:none}.msg,.typing,.qr{animation:none}.typing span{animation:none}}
 </style>
 </head>
 <body>
@@ -921,10 +935,11 @@ footer .wrap{display:flex;flex-wrap:wrap;gap:14px;justify-content:space-between;
 <button class="chat-btn" id="chatBtn" onclick="openChat()">
   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
   Chat for a quote
+  <span class="dot"></span>
 </button>
 <div class="chat-panel" id="chatPanel">
   <div class="chat-head">
-    <div class="logo">{{ logo|safe }}</div>
+    <div class="logo">{{ logo|safe }}<span class="online"></span></div>
     <div><div class="t">Apex Assistant</div><div class="s">Typically replies in seconds</div></div>
     <button class="close" onclick="closeChat()">×</button>
   </div>
@@ -962,16 +977,29 @@ document.addEventListener('keydown',e=>{if(!document.getElementById('lb').classL
   if(e.key==='Escape')closeLb();if(e.key==='ArrowRight')stepLb(1);if(e.key==='ArrowLeft')stepLb(-1)});
 
 let greeted=false;
-function openChat(){document.getElementById('chatPanel').classList.add('open');document.getElementById('chatBtn').style.display='none';
-  if(!greeted){greeted=true;addMsg("Hi! 👋 I'm here for Apex Home Transformations. What are you looking to have done — a room or two, the outside of the house, fences?","bot")}
+function openChat(){document.getElementById('chatPanel').classList.add('open');
+  const wa=document.querySelector('.wa');if(wa)wa.style.display='none';
+  if(!greeted){greeted=true;
+    addMsg("Hi! 👋 I'm here for Apex Home Transformations. What are you looking to have done — a room or two, the outside of the house, fences?","bot");
+    addQuickReplies(["A room or two","Outside the house","Fences","Something else"]);
+  }
   document.getElementById('chatInput').focus()}
-function closeChat(){document.getElementById('chatPanel').classList.remove('open');document.getElementById('chatBtn').style.display='flex'}
-function addMsg(t,who){const m=document.createElement('div');m.className='msg '+who;m.textContent=t;const box=document.getElementById('msgs');box.appendChild(m);box.scrollTop=box.scrollHeight}
+function closeChat(){document.getElementById('chatPanel').classList.remove('open');
+  const wa=document.querySelector('.wa');if(wa)wa.style.display='grid'}
+function addMsg(t,who){const m=document.createElement('div');m.className='msg '+who;m.textContent=t;const box=document.getElementById('msgs');box.appendChild(m);box.scrollTop=box.scrollHeight;return m}
 function addImg(src){const m=document.createElement('div');m.className='msg img user';const i=document.createElement('img');i.src=src;m.appendChild(i);const box=document.getElementById('msgs');box.appendChild(m);box.scrollTop=box.scrollHeight}
+function addQuickReplies(options){const box=document.getElementById('msgs');const wrap=document.createElement('div');wrap.className='qr';
+  options.forEach(opt=>{const b=document.createElement('button');b.type='button';b.textContent=opt;
+    b.onclick=()=>{wrap.remove();sendMsg(opt)};wrap.appendChild(b)});
+  box.appendChild(wrap);box.scrollTop=box.scrollHeight}
 function typing(on){const box=document.getElementById('msgs');let t=document.getElementById('typing');
-  if(on&&!t){t=document.createElement('div');t.id='typing';t.className='typing';t.textContent='Apex is typing…';box.appendChild(t);box.scrollTop=box.scrollHeight}else if(!on&&t){t.remove()}}
-async function sendMsg(){const inp=document.getElementById('chatInput');const text=inp.value.trim();if(!text)return;
-  addMsg(text,'user');inp.value='';typing(true);
+  if(on&&!t){t=document.createElement('div');t.id='typing';t.className='typing';
+    t.innerHTML='<span></span><span></span><span></span>';box.appendChild(t);box.scrollTop=box.scrollHeight}
+  else if(!on&&t){t.remove()}}
+async function sendMsg(overrideText){const inp=document.getElementById('chatInput');
+  const text=overrideText!==undefined?overrideText:inp.value.trim();if(!text)return;
+  const existingQr=document.querySelector('.qr');if(existingQr)existingQr.remove();
+  addMsg(text,'user');if(overrideText===undefined)inp.value='';typing(true);
   try{const r=await fetch('/chat',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({message:text,website:document.getElementById('website').value})});
     const d=await r.json();typing(false);addMsg(d.reply,'bot');
   }catch(e){typing(false);addMsg("Sorry, something glitched there — give that another go?","bot")}}
@@ -1124,14 +1152,39 @@ def chat_endpoint():
     chat_activity[session_id] = recent
 
     conversation.append({"role": "user", "content": user_message})
-    try:
-        response = client_chat(model="llama-3.3-70b-versatile", messages=conversation, max_tokens=256, timeout=20)
-        ai_reply = response.choices[0].message.content
-    except Exception as e:
-        print(f"Chat completion failed: {e}")
+
+    ai_reply = None
+    last_error = None
+    for attempt in range(2):  # one retry - smooths over a momentary timeout/rate-limit
+        try:
+            response = client_chat(model="llama-3.3-70b-versatile", messages=conversation, max_tokens=256, timeout=20)
+            ai_reply = response.choices[0].message.content
+            break
+        except Exception as e:
+            last_error = e
+
+    if ai_reply is None:
+        print(f"Chat completion failed twice: {last_error}")
         conversation.pop()
+        failures = chat_failures.get(session_id, 0) + 1
+        chat_failures[session_id] = failures
+
+        if failures >= 2:
+            # The bot itself is down (bad key, Groq outage, etc.) - don't leave the
+            # customer stuck with no way forward. Give a human fallback, and if we
+            # already captured a way to reach them, email Claud directly so the
+            # enquiry isn't lost even though the AI side never finished.
+            if session_id not in notified_sessions and has_contact_info(conversation):
+                notified_sessions.add(session_id)
+                send_lead_email(list(conversation), list(session_images.get(session_id, [])))
+            return jsonify({"reply": (
+                f"Sorry — our chat assistant is having trouble right now. "
+                f"You can reach Claud directly on WhatsApp (https://wa.me/{BUSINESS['phone_e164']}) "
+                f"or call {BUSINESS['phone_display']}, and he'll sort your quote personally."
+            )})
         return jsonify({"reply": "Sorry, I had a brief hiccup there — could you send that again?"})
 
+    chat_failures[session_id] = 0
     lead_ready = bool(re.search(r"\[\[?\s*READY\s*\]?\]", ai_reply, re.I))
     ai_reply = re.sub(r"\[\[?\s*READY\s*\]?\]", "", ai_reply).replace("[LEAD_CAPTURED]", "").strip()
     if not ai_reply:
