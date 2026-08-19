@@ -236,7 +236,7 @@ Other notes:"""
 def summarise_lead(conv):
     try:
         resp = client_chat(
-            model="llama-3.3-70b-versatile",
+            model="openai/gpt-oss-120b",
             messages=[{"role": "system", "content": LEAD_SUMMARY_PROMPT},
                       {"role": "user", "content": _transcript(conv)}],
             max_tokens=250, temperature=0.2)
@@ -1157,7 +1157,7 @@ def chat_endpoint():
     last_error = None
     for attempt in range(2):  # one retry - smooths over a momentary timeout/rate-limit
         try:
-            response = client_chat(model="llama-3.3-70b-versatile", messages=conversation, max_tokens=256, timeout=20)
+            response = client_chat(model="openai/gpt-oss-120b", messages=conversation, max_tokens=256, timeout=20)
             ai_reply = response.choices[0].message.content
             break
         except Exception as e:
