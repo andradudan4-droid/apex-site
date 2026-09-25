@@ -3,18 +3,72 @@ import os
 import re
 import uuid
 import html
+import hashlib
+import threading
 import base64
 import time
 import requests
 from groq import Groq
 
 app = Flask(__name__)
-app.secret_key = os.environ.get("SECRET_KEY", "dev-secret-key-change-me")
+_fallback_secret = hashlib.sha256(
+    (
+        os.environ.get("GROQ_API_KEY", "")
+        + os.environ.get("RESEND_API_KEY", "")
+        + "apex-home-woking-v1"
+    ).encode("utf-8")
+).hexdigest()
+app.secret_key = os.environ.get("SECRET_KEY") or _fallback_secret
 app.config["SESSION_COOKIE_SAMESITE"] = "None"
 app.config["SESSION_COOKIE_SECURE"] = True
+app.config["SESSION_COOKIE_HTTPONLY"] = True
 app.config["MAX_CONTENT_LENGTH"] = 12 * 1024 * 1024
 
 _groq_client = None
+ip_activity = {}
+pending_lead_timers = {}
+MAX_ACTIVE_SESSIONS = 400
+
+
+def _client_ip():
+    forwarded = request.headers.get("X-Forwarded-For", "")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.remote_addr or "unknown"
+
+
+def _ip_rate_limited(limit_per_min=30):
+    ip = _client_ip()
+    now = time.time()
+    recent = [t for t in ip_activity.get(ip, []) if now - t < 60]
+    if len(recent) >= limit_per_min:
+        ip_activity[ip] = recent
+        return True
+    recent.append(now)
+    ip_activity[ip] = recent
+    if len(ip_activity) > 1000:
+        cutoff = now - 60
+        for k in list(ip_activity.keys()):
+            if not [t for t in ip_activity[k] if t >= cutoff]:
+                ip_activity.pop(k, None)
+    return False
+
+
+def _prune_sessions():
+    while len(all_conversations) > MAX_ACTIVE_SESSIONS:
+        oldest = next(iter(all_conversations))
+        all_conversations.pop(oldest, None)
+        session_images.pop(oldest, None)
+        chat_activity.pop(oldest, None)
+
+
+@app.after_request
+def _set_security_headers(response):
+    response.headers.setdefault("X-Content-Type-Options", "nosniff")
+    response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
+    response.headers.setdefault("Referrer-Policy", "strict-origin-when-cross-origin")
+    return response
+
 
 
 def client_chat(**kwargs):
@@ -499,9 +553,31 @@ PAGE = r"""<!DOCTYPE html>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>{{ b.name }} | Painters & Decorators in Woking, Surrey</title>
 <meta name="description" content="Apex Home Transformations — trusted painter & decorator in Woking covering {{ b.area_line }}. Interior & exterior painting, feature walls, fences and handyman work. Free quotes.">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://www.apexhome.co.uk/">
 <meta property="og:title" content="{{ b.name }} | Painters & Decorators in Woking">
 <meta property="og:description" content="Interior & exterior painting, decorating, fences and handyman work across Surrey. Free quotes.">
 <meta property="og:type" content="website">
+<meta property="og:url" content="https://www.apexhome.co.uk/">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "HousePainter",
+  "name": "Apex Home Transformations",
+  "url": "https://www.apexhome.co.uk",
+  "description": "Interior and exterior painting, decorating, feature walls, fences and handyman work across Woking, Chobham, Brookwood and Surrey.",
+  "telephone": "+447512918722",
+  "email": "apexhomeconstructions1@gmail.com",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Woking",
+    "addressRegion": "Surrey",
+    "postalCode": "GU22 7LJ",
+    "addressCountry": "GB"
+  },
+  "areaServed": ["Woking", "Chobham", "Brookwood", "Guildford", "Surrey"]
+}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
@@ -1123,14 +1199,39 @@ def sitemap():
 
 @app.route("/robots.txt")
 def robots():
-    return Response("User-agent: *\nAllow: /\n", mimetype="text/plain")
+    return Response("User-agent: *\nAllow: /\nSitemap: https://www.apexhome.co.uk/sitemap.xml\n", mimetype="text/plain")
+
+
+def _schedule_lead_fallback(session_id, delay=90.0):
+    old_timer = pending_lead_timers.pop(session_id, None)
+    if old_timer is not None:
+        old_timer.cancel()
+
+    def _fire():
+        pending_lead_timers.pop(session_id, None)
+        if session_id in notified_sessions:
+            return
+        conv = all_conversations.get(session_id)
+        if not conv or not has_contact_info(conv):
+            return
+        notified_sessions.add(session_id)
+        send_lead_email(list(conv), list(session_images.get(session_id, [])))
+
+    t = threading.Timer(delay, _fire)
+    t.daemon = True
+    pending_lead_timers[session_id] = t
+    t.start()
 
 
 @app.route("/chat", methods=["POST"])
 def chat_endpoint():
+    if _ip_rate_limited(limit_per_min=30):
+        return jsonify({"reply": "You're sending messages very quickly — give it a few seconds and try again."})
+
     session_id = session.get("session_id") or str(uuid.uuid4())
     session["session_id"] = session_id
     if session_id not in all_conversations:
+        _prune_sessions()
         all_conversations[session_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
     conversation = all_conversations[session_id]
 
@@ -1170,10 +1271,6 @@ def chat_endpoint():
         chat_failures[session_id] = failures
 
         if failures >= 2:
-            # The bot itself is down (bad key, Groq outage, etc.) - don't leave the
-            # customer stuck with no way forward. Give a human fallback, and if we
-            # already captured a way to reach them, email Claud directly so the
-            # enquiry isn't lost even though the AI side never finished.
             if session_id not in notified_sessions and has_contact_info(conversation):
                 notified_sessions.add(session_id)
                 send_lead_email(list(conversation), list(session_images.get(session_id, [])))
@@ -1193,17 +1290,26 @@ def chat_endpoint():
 
     if session_id not in notified_sessions and has_contact_info(conversation):
         if lead_ready or _looks_like_closing(user_message) or len(conversation) >= 24:
+            old_timer = pending_lead_timers.pop(session_id, None)
+            if old_timer is not None:
+                old_timer.cancel()
             notified_sessions.add(session_id)
             send_lead_email(list(conversation), list(session_images.get(session_id, [])))
+        else:
+            _schedule_lead_fallback(session_id, delay=90.0)
 
     return jsonify({"reply": ai_reply})
 
 
 @app.route("/upload", methods=["POST"])
 def upload_endpoint():
+    if _ip_rate_limited(limit_per_min=20):
+        return jsonify({"reply": "Please wait a moment before uploading another photo."}), 429
+
     session_id = session.get("session_id") or str(uuid.uuid4())
     session["session_id"] = session_id
     if session_id not in all_conversations:
+        _prune_sessions()
         all_conversations[session_id] = [{"role": "system", "content": SYSTEM_PROMPT}]
     conversation = all_conversations[session_id]
 
